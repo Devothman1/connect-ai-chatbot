@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect AI - المساعد الذكي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #4a6278;
+        }
+        
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: #4facfe;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .menu-item {
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .menu-item:hover {
+            background: #4a6278;
+            transform: translateX(5px);
+        }
+        
+        .menu-item.active {
+            background: #4facfe;
+        }
+        
+        .menu-icon {
+            font-size: 1.2rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            flex: 1;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        #messageInput:focus {
+            border-color: #4facfe;
+        }
+        
+        #sendButton {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .timestamp {
+            font-size: 0.7em;
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                z-index: 1000;
+                transition: left 0.3s;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 1001;
+                background: #4facfe;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>🚀 Connect AI</h1>
+            <p>مساعد ذكي متقدم</p>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li class="menu-item active" onclick="showSection('chat')">
+                <span class="menu-icon">💬</span>
+                <span>الدردشة</span>
+            </li>
+            <li class="menu-item" onclick="showSection('settings')">
+                <span class="menu-icon">⚙️</span>
+                <span>الإعدادات</span>
+            </li>
+            <li class="menu-item" onclick="showSection('features')">
+                <span class="menu-icon">🌟</span>
+                <span>الميزات</span>
+            </li>
+            <li class="menu-item" onclick="showSection('about')">
+                <span class="menu-icon">ℹ️</span>
+                <span>حول التطبيق</span>
+            </li>
+            <li class="menu-item" onclick="testAPI()">
+                <span class="menu-icon">🔧</span>
+                <span>فحص النظام</span>
+            </li>
+        </ul>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <h4>🤖 ذكاء اصطناعي</h4>
+                <p>تقنية Connect AI</p>
+            </div>
+            <div class="feature-card">
+                <h4>🌍 متعدد اللغات</h4>
+                <p>يدعم العربية</p>
+            </div>
+            <div class="feature-card">
+                <h4>⚡ سريع</h4>
+                <p>استجابة فورية</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #2c3e50; border-radius: 8px;">
+            <h4>📧 التواصل</h4>
+            <p style="font-size: 0.9em; margin-top: 10px;">othmanalif10@gmail.com</p>
+            <p style="font-size: 0.8em; opacity: 0.7;">Othman & Leo - African Startup</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        
+        <div class="container">
+            <div class="header">
+                <h1>🚀 Connect AI</h1>
+                <p>مساعد ذكي متقدم - صنع بـ ❤️ من Othman & Leo</p>
+            </div>
+            
+            <!-- Chat Section -->
+            <div class="section" id="chat-section">
+                <div class="chat-container" id="chatContainer">
+                    <div class="message bot-message">
+                        أهلاً بك في Connect AI! 🤖<br>
+                        أنا مساعدك الذكي المدعوم بتقنية Connect AI المتقدمة.<br>
+                        كيف يمكنني مساعدتك اليوم؟
+                        <div class="timestamp" id="initialTime"></div>
+                    </div>
+                    <div class="typing-indicator" id="typingIndicator">
+                        ⏳ جاري الكتابة...
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+                    <button id="sendButton">إرسال</button>
+                </div>
+            </div>
+            
+            <!-- Other Sections (Hidden by default) -->
+            <div class="section" id="settings-section" style="display: none;">
+                <div style="padding: 20px;">
+                    <h3>⚙️ الإعدادات</h3>
+                    <div class="feature-card">
+                        <h4>إعدادات الذكاء الاصطناعي</h4>
+                        <p>نموذج: Connect AI Pro</p>
+                        <p>اللغة: العربية</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section" id="features-section" style="display: none;">
+                <div style="padding: 20px;">
+                    <h3>🌟 الميزات المتقدمة</h3>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h4>💬 دردشة ذكية</h4>
+                            <p>محادثات طبيعية مع Connect AI</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🌐 متعدد اللغات</h4>
+                            <p>يدعم العربية والإنجليزية</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>⚡ استجابة سريعة</h4>
+                            <p>تقنية Connect AI المتطورة</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🔒 Connect Database</h4>
+                            <p>نظام قاعدة بيانات آمن</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section" id="about-section" style="display: none;">
+                <div style="padding: 20px;">
+                    <h3>ℹ️ حول Connect AI</h3>
+                    <div class="feature-card">
+                        <h4>🦸 المطورون</h4>
+                        <p><strong>Othman & Leo</strong></p>
+                        <p>شركة ناشئة أفريقية متخصصة في الذكاء الاصطناعي</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📧 التواصل</h4>
+                        <p><strong>othmanalif10@gmail.com</strong></p>
+                        <p>نحن هنا لمساعدتك!</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🚀 التقنية</h4>
+                        <p>مدعوم بـ Connect AI Technology</p>
+                        <p>إصدار 2025</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const initialTime = document.getElementById('initialTime');
+
+        // تعيين الوقت الحالي
+        initialTime.textContent = new Date().toLocaleTimeString('ar-EG');
+
+        // دوال إدارة الواجهة
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // تحديث القائمة النشطة
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // إغلاق السايدبار في الجوال
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        async function testAPI() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                alert('✅ النظام يعمل بشكل ممتاز!\n\nالمطور: ' + data.stats.developer + '\nالنموذج: ' + data.stats.model);
+            } catch (error) {
+                alert('❌ هناك مشكلة في الاتصال بالخادم');
+            }
+        }
+
+        // دوال الدردشة
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isUser ? 'message user-message' : 'message bot-message';
+            
+            const time = new Date().toLocaleTimeString('ar-EG', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            // معالجة الأسطر الجديدة
+            const formattedText = text.replace(/\n/g, '<br>');
+            
+            messageDiv.innerHTML = `
+                ${formattedText}
+                <div class="timestamp">${time}</div>
+            `;
+            
+            chatContainer.insertBefore(messageDiv, typingIndicator);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            messageInput.value = '';
+            addMessage(message, true);
+            showTyping();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.success) {
+                    addMessage(data.response);
+                } else {
+                    addMessage('❌ خطأ: ' + data.error);
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage('❌ خطأ في الاتصال بالخادم');
+            }
+        }
+
+        // أحداث الإدخال
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        messageInput.focus();
+    </script>
+</body>
+</html>
